@@ -1,14 +1,17 @@
 import {Builder, Capabilities, Browser, By, Key, until} from 'selenium-webdriver';
 import assert from 'assert';
-// import Url from '../lib/config/url'
-// import User from '../lib/input/user'
+import { Url } from '../app/config'
+import { User } from '../app/input'
+import { PackingListElements } from '../app/elements';
+import {SeleniumHelper} from '../app/helper';
+
 import ObjectsToCsv from 'objects-to-csv';
 
 
 describe('Packing List', function() {
 
     it('Check CSV',async function() {
-      let urls = ["http://localhost/shimada_shoji_v2","http://localhost/shimada_shoji"];
+      let urls = [Url.shimada_v1,Url.shimada_v2];
       let outputs = [];
       
       for (const index in urls) {
@@ -21,39 +24,39 @@ describe('Packing List', function() {
           //open web browser v2
           await driver.get(url);
           //input user name
-          await driver.findElement(By.css('#user')).sendKeys("admin");
+          await driver.findElement(By.css(PackingListElements.INPUT_USERNAME)).sendKeys(User.admin.username);
           //input password
-          await driver.findElement(By.css('#pass')).sendKeys("Csv020201#");
+          await driver.findElement(By.css(PackingListElements.INPUT_PASSWORD)).sendKeys(User.admin.password);
           //login button click
-          await driver.findElement(By.css("input[value='Login']")).click();
+          await driver.findElement(By.css(PackingListElements.BUTTON_LOGIN)).click();
+
+          await driver.wait(SeleniumHelper.waitWhenWebLoadDoned(driver), 10000);
 
           // wait for packing slidebar
           await driver.get(url+"/packing_list");
 
           //wait until table load completed
-          await driver.wait(until.elementLocated(By.css("#packing_list tbody tr td :nth-child(1)")));
+          await driver.wait(until.elementLocated(By.css(PackingListElements.LABEL_LOADING_TABLE_DONE)), 10000);
 
           //select show 100 entries
-          await (await driver.wait(until.elementLocated(By.css("select[name='packing_list_length'] > option[value='100']")))).click();
-          await (await driver.wait(until.elementLocated(By.css("select[name='packing_list_length']")))).sendKeys('100');
+          await (await driver.wait(until.elementLocated(By.css(PackingListElements.DROPDOWN_CHANGE_LENGTH_TABLE)))).sendKeys('100');
 
-          //wait until table load completed
-          // driver.wait(until.elementLocated(By.css("#packing_list tbody tr td :nth-child(1)")));
 
-          await driver.wait(until.elementLocated(By.css('#packing_list_processing[style*="display: none;"]')));
+
+          await driver.wait(until.elementLocated(By.css()));
 
           //Click pack no to sort 
-          await (await driver.wait(until.elementLocated(By.css("div[class='DTFC_LeftHeadWrapper'] th[aria-label='Pack No: activate to sort column ascending']")))).click();
+          await (await driver.wait(until.elementLocated(By.css(PackingListElements.BUTTON_SORT_PACK_NO_ASC)))).click();
           
-          await driver.wait(until.elementLocated(By.css('#packing_list_processing[style*="display: none;"]')));
+          await driver.wait(until.elementLocated(By.css(PackingListElements.LABEL_LOADING_TABLE_DONE)));
 
           let arr = [];
 
-          // for (let i = 0; i < 10; i++) {
-          //   //Get datatable packing_list
-          //   console.log(`Page ${i+1}`)
+          for (let i = 0; i < 10; i++) {
+            //Get datatable packing_list
+            console.log(`Page ${i+1}`)
 
-            let tableCells = await driver.findElements(By.css("#packing_list tbody tr"));
+            let tableCells = await driver.findElements(By.css(PackingListElements.TR_PACKING_LIST));
           
             
             for (let index = 0; index < tableCells.length; index++) {
@@ -69,11 +72,11 @@ describe('Packing List', function() {
               arr.push(obj);
             }
             
-            // await (await driver.wait(until.elementLocated(By.xpath("//a[normalize-space()='Next']")))).click();
+            await (await driver.wait(until.elementLocated(By.css(PackingListElements.BUTTON_NEXT_PAGE_TABLE)))).click();
 
-            // await driver.wait(until.elementLocated(By.css('#packing_list_processing[style*="display: none;"]')));
+            await driver.wait(until.elementLocated(By.css(PackingListElements.LABEL_LOADING_TABLE_DONE)));
             
-          // }
+          }
 
           const csv = new ObjectsToCsv(arr);
           await csv.toDisk(`./list${index}.csv`);

@@ -1,8 +1,8 @@
 import {Builder, Capabilities, Browser, By, Key, until} from 'selenium-webdriver';
 import assert from 'assert';
-import {Url} from '../app/config'
-import {GoogleElements} from '../app/elements'
-import {SeleniumHelper} from '../app/helper';
+import {Url} from './app/config'
+import {GoogleElements} from './app/elements'
+import {SeleniumHelper} from './app/helper';
 
 describe("Google", function() {
     it("should work", async function() {
