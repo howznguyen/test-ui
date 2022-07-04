@@ -8,7 +8,11 @@ export default {
 
     INPUT_USERNAME : `#user`,
     INPUT_PASSWORD : `#pass`,
+    INPUT_PACKING_FROM : `#packing_from`,
+    INPUT_PACKING_TO : `#packing_to`,
 
     LABEL_LOADING_TABLE_DONE : `#packing_list_processing[style*="display: none;"]`,
     TR_PACKING_LIST : `#packing_list tbody tr`,
+
+    BUTTON_SEARCH: `#search`
 }

@@ -4,13 +4,15 @@ import { Url } from '../app/config'
 import { User } from '../app/input'
 import { PackingListElements } from '../app/elements';
 import {SeleniumHelper} from '../app/helper';
+import fs from 'fs';
+import moment from 'moment';
 
 import ObjectsToCsv from 'objects-to-csv';
 
 
 describe('Packing List', function() {
 
-    it('Check CSV',async function() {
+    it('Check V1 to V2',async function() {
       let urls = [Url.shimada_v1,Url.shimada_v2];
       let outputs = [];
       
@@ -38,12 +40,26 @@ describe('Packing List', function() {
           //wait until table load completed
           await driver.wait(until.elementLocated(By.css(PackingListElements.LABEL_LOADING_TABLE_DONE)), 10000);
 
-          //select show 100 entries
+          // Search by date
+          let beginDate = moment().startOf('year').format('DD-MMM-YYYY').toString();
+          let endDate = moment().endOf('year').format('DD-MMM-YYYY').toString();
+          console.log(beginDate,endDate);
+          await driver.findElement(By.css(PackingListElements.INPUT_PACKING_FROM)).sendKeys('value',beginDate);
+          await driver.findElement(By.css('html')).click();
+          await driver.findElement(By.css(PackingListElements.INPUT_PACKING_TO)).sendKeys('value',endDate);
+          await driver.findElement(By.css('html')).click();
+
+          let image = await driver.takeScreenshot();
+          await fs.writeFileSync('./image/packing_list/captured_image_1.png', image, 'base64')
+
+          await driver.findElement(By.css(PackingListElements.BUTTON_SEARCH)).click();
+
+          await driver.wait(until.elementLocated(By.css(PackingListElements.LABEL_LOADING_TABLE_DONE)), 10000);
+
+          // select show 100 entries
           await (await driver.wait(until.elementLocated(By.css(PackingListElements.DROPDOWN_CHANGE_LENGTH_TABLE)))).sendKeys('100');
 
-
-
-          await driver.wait(until.elementLocated(By.css()));
+          await driver.wait(until.elementLocated(By.css(PackingListElements.LABEL_LOADING_TABLE_DONE)));
 
           //Click pack no to sort 
           await (await driver.wait(until.elementLocated(By.css(PackingListElements.BUTTON_SORT_PACK_NO_ASC)))).click();
@@ -52,7 +68,7 @@ describe('Packing List', function() {
 
           let arr = [];
 
-          for (let i = 0; i < 10; i++) {
+          for (let i = 0; i < 1; i++) {
             //Get datatable packing_list
             console.log(`Page ${i+1}`)
 
@@ -68,7 +84,7 @@ describe('Packing List', function() {
               obj.kvt_no = await tableCells[index].findElement(By.css('td:nth-child(5)')).getText();
               obj.req_pack_date = await tableCells[index].findElement(By.css('td:nth-child(6)')).getText();
               obj.meas_date = await tableCells[index].findElement(By.css('td:nth-child(7)')).getText();
-              obj.consignee = await tableCells[index].findElement(By.css('td:nth-child(8)')).getText();   
+              obj.consignee = await tableCells[index].findElement(By.css('td:nth-child(8)')).getText();
               arr.push(obj);
             }
             
@@ -79,15 +95,17 @@ describe('Packing List', function() {
           }
 
           const csv = new ObjectsToCsv(arr);
-          await csv.toDisk(`./list${index}.csv`);
+          await csv.toDisk(`./output/packing_list/TESTCASE_V${index}.csv`);
           let csv_str = await csv.toString();
           outputs.push(csv_str);
           await driver.quit();
-        }catch{
+        }catch(e){
+          console.log(e);
           await driver.quit();
           outputs.push(`Error at ${url}`);
         }
       }
       assert.equal(outputs[0],outputs[1]);
     });
+
 });
