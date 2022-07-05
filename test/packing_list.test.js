@@ -35,24 +35,18 @@ describe('Packing List', function() {
           await driver.wait(SeleniumHelper.waitWhenWebLoadDoned(driver), 10000);
 
           // wait for packing slidebar
-          await driver.get(url+"/packing_list");
+          let beginDate = moment().startOf('year').format('DD-MMM-YYYY').toString();
+          let endDate = moment().endOf('year').format('DD-MMM-YYYY').toString();
+          await driver.get(`${url}/packing_list?packing_from=${beginDate}&packing_to=${endDate}`);
 
           //wait until table load completed
           await driver.wait(until.elementLocated(By.css(PackingListElements.LABEL_LOADING_TABLE_DONE)), 10000);
 
           // Search by date
-          let beginDate = moment().startOf('year').format('DD-MMM-YYYY').toString();
-          let endDate = moment().endOf('year').format('DD-MMM-YYYY').toString();
-          console.log(beginDate,endDate);
-          await driver.findElement(By.css(PackingListElements.INPUT_PACKING_FROM)).sendKeys('value',beginDate);
-          await driver.findElement(By.css('html')).click();
-          await driver.findElement(By.css(PackingListElements.INPUT_PACKING_TO)).sendKeys('value',endDate);
-          await driver.findElement(By.css('html')).click();
 
           let image = await driver.takeScreenshot();
-          await fs.writeFileSync('./image/packing_list/captured_image_1.png', image, 'base64')
+          await fs.writeFileSync(`./image/packing_list/captured_image_v${1}.png`, image, 'base64')
 
-          await driver.findElement(By.css(PackingListElements.BUTTON_SEARCH)).click();
 
           await driver.wait(until.elementLocated(By.css(PackingListElements.LABEL_LOADING_TABLE_DONE)), 10000);
 

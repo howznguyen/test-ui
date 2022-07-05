@@ -5,11 +5,13 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "./node_modules/.bin/mocha ./test  --timeout 1000000000 --reporter-option maxDiffSize=0 --es-module-specifier-resolution=node"
+    "tests": "./node_modules/.bin/mocha ./test  --timeout 100000000 --reporter-option maxDiffSize=0 --es-module-specifier-resolution=node",
+    "test": "./node_modules/.bin/mocha ./test/order_out.test.js --timeout 100000000 --reporter-option maxDiffSize=0 --es-module-specifier-resolution=node "
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "lodash": "^4.17.21",
     "moment": "^2.29.3",
     "objects-to-csv": "^1.3.6",
     "paralleljs": "^1.1.0",
